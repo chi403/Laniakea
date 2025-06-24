@@ -1,109 +1,95 @@
-<!DOCTYPE html>
+z<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Heart Landing Page</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Arial', sans-serif;
-      background: url('background.jpg') no-repeat center center/cover;
-      height: 100vh;
-      overflow: hidden;
-      position: relative;
-      text-align: center;
-      color: white;
-    }
-
-    .message {
-      position: absolute;
-      top: 40%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 3rem;
-      font-weight: bold;
-      text-shadow: 2px 2px 5px black;
-    }
-
-    .heart {
-      width: 20px;
-      height: 20px;
-      background-color: red;
-      position: absolute;
-      transform: rotate(45deg);
-      animation: float 5s linear infinite;
-    }
-
-    .heart::before,
-    .heart::after {
-      content: '';
-      width: 20px;
-      height: 20px;
-      background-color: red;
-      border-radius: 50%;
-      position: absolute;
-    }
-
-    .heart::before {
-      top: -10px;
-      left: 0;
-    }
-
-    .heart::after {
-      left: -10px;
-      top: 0;
-    }
-
-    @keyframes float {
-      0% {
-        bottom: 0;
-        opacity: 1;
+  <head>
+    <meta charset="UTF-8" />
+    <title>3D Space Planet</title>
+    <style>
+      body, html {
+        margin: 0;
+        overflow: hidden;
+        background: black;
+        font-family: 'Arial', sans-serif;
       }
-      100% {
-        bottom: 100%;
-        opacity: 0;
+
+      #canvas-container {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
       }
-    }
-  </style>
-</head>
-<body>
 
-  <audio autoplay loop>
-    <source src="music.mp3" type="audio/mp3" />
-    Your browser does not support the audio tag.
-  </audio>
+      #message {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: 2em;
+        text-shadow: 2px 2px 8px black;
+        z-index: 2;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="canvas-container"></div>
+    <div id="message">WELCOME TO YOUR WORLD</div>
 
-  <div class="message" id="nameMessage">WELCOME</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r148/three.min.js"></script>
+    <script>
+      // Setup scene
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        60,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-  <script>
-    // Read name from URL
-    const params = new URLSearchParams(window.location.search);
-    const name = params.get("name");
-    if (name) {
-      document.getElementById("nameMessage").innerText = `HELLO, ${name}!`;
-    }
+      // Add stars background
+      scene.background = new THREE.CubeTextureLoader().load([
+        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/px.jpg',
+        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/nx.jpg',
+        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/py.jpg',
+        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/ny.jpg',
+        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/pz.jpg',
+        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/nz.jpg',
+      ]);
 
-    // Create floating hearts
-    function createHeart() {
-      const heart = document.createElement('div');
-      heart.classList.add('heart');
-      heart.style.left = Math.random() * 100 + 'vw';
-      heart.style.animationDuration = (Math.random() * 3 + 2) + 's';
-      document.body.appendChild(heart);
+      // Add lighting
+      const light = new THREE.PointLight(0xffffff, 2);
+      light.position.set(5, 5, 5);
+      scene.add(light);
 
-      setTimeout(() => {
-        heart.remove();
-      }, 5000);
-    }
+      // Add planet (with custom texture)
+      const textureLoader = new THREE.TextureLoader();
+      const planetTexture = textureLoader.load('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/EarthEasternHemisphere.jpg/800px-EarthEasternHemisphere.jpg');
 
-    setInterval(createHeart, 300);
-  </script>
+      const geometry = new THREE.SphereGeometry(2, 64, 64);
+      const material = new THREE.MeshStandardMaterial({ map: planetTexture });
+      const sphere = new THREE.Mesh(geometry, material);
+      scene.add(sphere);
 
-</body>
+      camera.position.z = 5;
+
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate);
+        sphere.rotation.y += 0.002;
+        sphere.rotation.x += 0.0005;
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
 </html>
