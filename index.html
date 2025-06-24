@@ -1,4 +1,4 @@
-z<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -48,24 +48,17 @@ z<!DOCTYPE html>
       renderer.setSize(window.innerWidth, window.innerHeight);
       document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-      // Add stars background
-      scene.background = new THREE.CubeTextureLoader().load([
-        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/px.jpg',
-        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/nx.jpg',
-        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/py.jpg',
-        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/ny.jpg',
-        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/pz.jpg',
-        'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/cube/space/nz.jpg',
-      ]);
+      // Simple star background color
+      scene.background = new THREE.Color(0x000000);
 
       // Add lighting
       const light = new THREE.PointLight(0xffffff, 2);
       light.position.set(5, 5, 5);
       scene.add(light);
 
-      // Add planet (with custom texture)
+      // Add planet
       const textureLoader = new THREE.TextureLoader();
-      const planetTexture = textureLoader.load('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/EarthEasternHemisphere.jpg/800px-EarthEasternHemisphere.jpg');
+      const planetTexture = textureLoader.load('https://planet-texture-assets.s3.amazonaws.com/earth.jpg');
 
       const geometry = new THREE.SphereGeometry(2, 64, 64);
       const material = new THREE.MeshStandardMaterial({ map: planetTexture });
@@ -84,7 +77,7 @@ z<!DOCTYPE html>
 
       animate();
 
-      // Handle window resize
+      // Handle resize
       window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
