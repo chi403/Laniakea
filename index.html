@@ -2,127 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Catch the Hearts 💖</title>
+  <title>Pop the Hearts</title>
   <style>
     body {
-      margin: 0;
-      overflow: hidden;
-      background: radial-gradient(circle at center, #ff7eb3, #ff758c);
+      margin: 0; overflow: hidden;
       font-family: Arial, sans-serif;
+      background: radial-gradient(#ffdde1, #ee9ca7);
     }
-    canvas {
-      display: block;
+    #score {
+      position: absolute; top: 20px; left: 20px;
+      font-size: 24px; font-weight: bold;
+      color: #fff; text-shadow: 2px 2px #000;
     }
-    #scoreboard {
+    .heart {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      color: white;
-      font-size: 24px;
-      font-weight: bold;
-      text-shadow: 1px 1px 4px #000;
+      width: 50px; height: 50px;
+      background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Heart_coraz%C3%B3n.svg/2048px-Heart_coraz%C3%B3n.svg.png') no-repeat center/contain;
+      cursor: pointer;
+      animation: float 6s linear infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(100vh) rotate(0deg); }
+      100% { transform: translateY(-100vh) rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <div id="scoreboard">Score: 0 | Missed: 0</div>
-  <canvas id="game"></canvas>
+  <div id="score">Score: 0</div>
+  <audio id="popSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+  <audio id="bgMusic" src="https://www.bensound.com/bensound-music/bensound-sunny.mp3" autoplay loop></audio>
+
   <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const scoreboard = document.getElementById("scoreboard");
     let score = 0;
-    let missed = 0;
-    let gameOver = false;
+    const scoreEl = document.getElementById("score");
+    const popSound = document.getElementById("popSound");
 
-    const basket = {
-      x: canvas.width / 2 - 40,
-      y: canvas.height - 80,
-      width: 80,
-      height: 40,
-      color: "white"
-    };
+    function createHeart() {
+      const heart = document.createElement("div");
+      heart.classList.add("heart");
+      heart.style.left = Math.random() * (window.innerWidth - 50) + "px";
+      heart.style.animationDuration = (3 + Math.random() * 4) + "s";
 
-    let hearts = [];
+      heart.onclick = () => {
+        score++;
+        scoreEl.textContent = "Score: " + score;
+        popSound.currentTime = 0;
+        popSound.play();
+        heart.remove();
+      };
 
-    function drawHeart(x, y, size, color) {
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.beginPath();
-      const topCurveHeight = size * 0.3;
-      ctx.moveTo(0, topCurveHeight);
-      ctx.bezierCurveTo(0, 0, -size / 2, 0, -size / 2, topCurveHeight);
-      ctx.bezierCurveTo(-size / 2, size, 0, size, 0, size + 5);
-      ctx.bezierCurveTo(0, size, size / 2, size, size / 2, topCurveHeight);
-      ctx.bezierCurveTo(size / 2, 0, 0, 0, 0, topCurveHeight);
-      ctx.closePath();
-      ctx.fillStyle = color;
-      ctx.fill();
-      ctx.restore();
+      document.body.appendChild(heart);
+
+      // Remove after animation
+      setTimeout(() => {
+        if (heart.parentNode) heart.remove();
+      }, 7000);
     }
 
-    function spawnHeart() {
-      hearts.push({
-        x: Math.random() * (canvas.width - 30) + 15,
-        y: -30,
-        size: 20 + Math.random() * 10,
-        speed: 2 + Math.random() * 3,
-        color: "#ff4d6d"
-      });
-    }
-
-    function drawBasket() {
-      ctx.fillStyle = basket.color;
-      ctx.fillRect(basket.x, basket.y, basket.width, basket.height);
-    }
-
-    function update() {
-      if (gameOver) return;
-
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawBasket();
-
-      for (let i = hearts.length - 1; i >= 0; i--) {
-        const h = hearts[i];
-        h.y += h.speed;
-        drawHeart(h.x, h.y, h.size, h.color);
-
-        if (
-          h.y + h.size > basket.y &&
-          h.x > basket.x &&
-          h.x < basket.x + basket.width
-        ) {
-          score++;
-          hearts.splice(i, 1);
-        } else if (h.y > canvas.height) {
-          missed++;
-          hearts.splice(i, 1);
-        }
-      }
-
-      scoreboard.innerText = `Score: ${score} | Missed: ${missed}`;
-      if (missed >= 3) {
-        gameOver = true;
-        ctx.fillStyle = "white";
-        ctx.font = "48px sans-serif";
-        ctx.fillText("Game Over!", canvas.width / 2 - 120, canvas.height / 2);
-      }
-
-      requestAnimationFrame(update);
-    }
-
-    setInterval(() => {
-      if (!gameOver) spawnHeart();
-    }, 700);
-
-    window.addEventListener("mousemove", (e) => {
-      basket.x = e.clientX - basket.width / 2;
-    });
-
-    update();
+    // Create new hearts every 600ms
+    setInterval(createHeart, 600);
   </script>
 </body>
 </html>
